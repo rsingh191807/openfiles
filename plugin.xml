@@ -32,7 +32,7 @@
         <source-file src="src/ios/OpenFiles.m" framework="true"/>
     </platform>
     
-    <js-module src=src="www/OpenFiles.js" name="OpenFiles">
+    <js-module src="www/OpenFiles.js" name="OpenFiles">
         <clobbers target="cordova.plugins.OpenFiles" />
     </js-module>
 
