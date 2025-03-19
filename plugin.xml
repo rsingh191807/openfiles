@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:ios="http://apache.org/cordova/ns/plugins/1.0"
-        id="cordova-plugin-filepicker"
+        id="com.example.openfiles"
         version="1.0.0">
    
     <name>OpenFiles</name>
