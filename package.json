@@ -1,0 +1,12 @@
+{
+  "name": "openfiles",
+  "version": "1.0.0",
+  "description": "Plugin to open files directly in android and ios",
+  "license": "ISC",
+  "author": "rsingh19",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
