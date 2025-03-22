@@ -1,67 +1,51 @@
 #import "OpenFiles.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 
-@interface OpenFiles () <UIDocumentPickerDelegate>
-@property (nonatomic, strong) CDVInvokedUrlCommand *command;
-@end
-
 @implementation OpenFiles
 
 - (void)open:(CDVInvokedUrlCommand*)command {
-    self.command = command;
+    self.callbackId = command.callbackId;
 
-    // Allowed file types (all types)
-    NSArray *documentTypes = @[(NSString *)kUTTypeItem];
-
-    // Create document picker
-    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:documentTypes inMode:UIDocumentPickerModeOpen];
-    documentPicker.delegate = self;
-
-    // Present the document picker
     dispatch_async(dispatch_get_main_queue(), ^{
+        UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString*)kUTTypeItem] inMode:UIDocumentPickerModeImport];
+
+        documentPicker.delegate = self;
+        documentPicker.modalPresentationStyle = UIModalPresentationFullScreen;
+
         UIViewController *rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
         [rootViewController presentViewController:documentPicker animated:YES completion:nil];
     });
 }
 
-// Document picker delegate method
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
-    if (urls.count == 0) {
-        [self sendError:@"No file selected."];
-        return;
+    if (urls.count > 0) {
+        NSURL *fileURL = urls[0];
+        NSString *filePath = [fileURL path];
+        NSString *fileName = [fileURL lastPathComponent];
+
+        NSError *error;
+        NSData *fileData = [NSData dataWithContentsOfURL:fileURL options:NSDataReadingMappedIfSafe error:&error];
+
+        if (error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to read file"];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+            return;
+        }
+
+        NSDictionary *fileInfo = @{
+            @"fileName": fileName,
+            @"filePath": filePath,
+            @"fileData": [fileData base64EncodedStringWithOptions:0]
+        };
+
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:fileInfo];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
     }
-
-    NSURL *fileURL = [urls firstObject];
-    NSString *filePath = [fileURL path];
-
-    // Read file as binary and convert to Base64
-    NSData *fileData = [NSData dataWithContentsOfURL:fileURL];
-    if (fileData == nil) {
-        [self sendError:@"Failed to read file."];
-        return;
-    }
-
-    NSString *base64Data = [fileData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-
-    // Create JSON response
-    NSDictionary *result = @{
-        @"filePath": filePath,
-        @"fileData": base64Data
-    };
-
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.command.callbackId];
 }
 
-// Handle cancel event
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    [self sendError:@"File selection was cancelled."];
-}
-
-// Helper method to send error message
-- (void)sendError:(NSString *)message {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"User canceled file selection"];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
 @end
