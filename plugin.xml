@@ -24,11 +24,14 @@
 
    <!-- iOS Platform -->
     <platform name="ios">
-        <config-file target="config.xml" parent="/*">
-            <feature name="OpenFiles">
-                <param name="ios-package" value="OpenFiles"/>
-            </feature>
-        </config-file>
+        
+        <feature name="OpenFiles">
+            <param name="ios-package" value="OpenFiles"/>
+        </feature>
+        
+        <header-file src="src/ios/OpenFiles.h"/>
+        <source-file src="src/ios/OpenFiles.m"/>
+        
 
         <config-file target="*-Info.plist" parent="NSDocumentsDirectoryUsageDescription">
             <string>We need access to your documents</string>
@@ -42,7 +45,7 @@
             <true/>
         </config-file>
 
-        <source-file src="src/ios/OpenFiles.m" framework="true"/>
+
     </platform>
     
     <js-module src="www/OpenFiles.js" name="OpenFiles">
