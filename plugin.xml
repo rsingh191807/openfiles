@@ -29,7 +29,7 @@
             <param name="ios-package" value="OpenFiles"/>
         </feature>
         
-        <header-file src="src/ios/OpenFiles.h"/>
+        <source-file src="src/ios/OpenFiles.h"/>
         <source-file src="src/ios/OpenFiles.m"/>
         
 
